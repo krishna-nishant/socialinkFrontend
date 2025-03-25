@@ -1,21 +1,19 @@
+import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Camera, Mail, User } from "lucide-react";
-import { useState, useEffect } from "react";
 
-function ProfilePage() {
-  const { authUser, isUpdatingProfile, updateProfile, checkAuth } =
-    useAuthStore();
+const ProfilePage = () => {
+  const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
   const [selectedImg, setSelectedImg] = useState(null);
 
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
   const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files[0];
     if (!file) return;
+
     const reader = new FileReader();
+
     reader.readAsDataURL(file);
+
     reader.onload = async () => {
       const base64Image = reader.result;
       setSelectedImg(base64Image);
@@ -24,7 +22,7 @@ function ProfilePage() {
   };
 
   return (
-    <div className="h-max pt-20">
+    <div className="h-screen pt-20">
       <div className="max-w-2xl mx-auto p-4 py-8">
         <div className="bg-base-300 rounded-xl p-6 space-y-8">
           <div className="text-center">
@@ -32,22 +30,26 @@ function ProfilePage() {
             <p className="mt-2">Your profile information</p>
           </div>
 
-          {/* Avatar upload section */}
+          {/* avatar upload section */}
+
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
-                src={selectedImg || authUser?.data?.profilePic || "/avatar.png"}
+                src={selectedImg || authUser.profilePic || "/avatar.png"}
                 alt="Profile"
                 className="size-32 rounded-full object-cover border-4 "
               />
               <label
                 htmlFor="avatar-upload"
-                className={`absolute bottom-0 right-0 
-                  bg-base-content hover:scale-105 p-2 
-                  rounded-full cursor-pointer transition-all duration-200 
+                className={`
+                  absolute bottom-0 right-0 
+                  bg-base-content hover:scale-105
+                  p-2 rounded-full cursor-pointer 
+                  transition-all duration-200
                   ${
                     isUpdatingProfile ? "animate-pulse pointer-events-none" : ""
-                  }`}
+                  }
+                `}
               >
                 <Camera className="w-5 h-5 text-base-200" />
                 <input
@@ -74,7 +76,7 @@ function ProfilePage() {
                 Full Name
               </div>
               <p className="px-4 py-2.5 bg-base-200 rounded-lg border">
-                {authUser?.data?.fullName || "N/A"}
+                {authUser?.fullName}
               </p>
             </div>
 
@@ -84,7 +86,7 @@ function ProfilePage() {
                 Email Address
               </div>
               <p className="px-4 py-2.5 bg-base-200 rounded-lg border">
-                {authUser?.data?.email || "N/A"}
+                {authUser?.email}
               </p>
             </div>
           </div>
@@ -94,7 +96,7 @@ function ProfilePage() {
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between py-2 border-b border-zinc-700">
                 <span>Member Since</span>
-                <span>{authUser?.data?.createdAt?.split("T")[0] || "N/A"}</span>
+                <span>{authUser.createdAt?.split("T")[0]}</span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <span>Account Status</span>
@@ -106,6 +108,5 @@ function ProfilePage() {
       </div>
     </div>
   );
-}
-
+};
 export default ProfilePage;
