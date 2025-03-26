@@ -10,39 +10,12 @@ export const axiosInstance = axios.create({
   },
 });
 
-// Add request interceptor for debugging
-axiosInstance.interceptors.request.use(
-  (config) => {
-    console.log("Request:", {
-      url: config.url,
-      method: config.method,
-      headers: config.headers,
-      withCredentials: config.withCredentials,
-    });
-    return config;
-  },
-  (error) => {
-    console.error("Request error:", error);
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor for debugging
 axiosInstance.interceptors.response.use(
-  (response) => {
-    console.log("Response:", {
-      status: response.status,
-      headers: response.headers,
-      data: response.data,
-    });
-    return response;
-  },
+  (response) => response,
   (error) => {
-    console.error("Response error:", {
-      status: error.response?.status,
-      data: error.response?.data,
-      headers: error.response?.headers,
-    });
+    if (error.response?.status === 401) {
+      // Handle unauthorized access
+    }
     return Promise.reject(error);
   }
 );
