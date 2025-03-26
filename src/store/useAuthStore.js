@@ -108,19 +108,18 @@ export const useAuthStore = create((set, get) => ({
     console.log("Connecting socket...");
     const socket = io(BASE_URL, {
       withCredentials: true,
-      transports: ["polling", "websocket"], // Try polling first, then WebSocket
+      transports: ["websocket", "polling"],
       query: {
         userId: authUser._id,
-      },
-      extraHeaders: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
       },
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      timeout: 60000,
+      forceNew: true,
+      path: "/socket.io/",
+      autoConnect: true,
+      allowEIO3: true,
     });
 
     socket.on("connect", () => {
@@ -129,14 +128,10 @@ export const useAuthStore = create((set, get) => ({
 
     socket.on("connect_error", (error) => {
       console.error("Socket connection error:", error);
-      // Try to reconnect with different transport
+      // Try to reconnect with polling if WebSocket fails
       if (error.message.includes("WebSocket")) {
         console.log("Falling back to polling transport...");
         socket.io.opts.transports = ["polling"];
-        socket.connect();
-      } else if (error.message.includes("polling")) {
-        console.log("Falling back to WebSocket transport...");
-        socket.io.opts.transports = ["websocket"];
         socket.connect();
       }
     });
@@ -144,6 +139,15 @@ export const useAuthStore = create((set, get) => ({
     socket.on("getOnlineUsers", (userIds) => {
       console.log("Online users:", userIds);
       set({ onlineUsers: userIds });
+    });
+
+    socket.on("newMessage", (message) => {
+      console.log("New message received:", message);
+      // Handle new message here
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
     });
 
     socket.connect();
